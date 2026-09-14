@@ -1,25 +1,37 @@
 // ============================================
-// Roblox Game Pass Maker - Pro Edition
+// Roblox Game Pass Maker - DEMO EDITION
+// Frontend only - LOCAL STORAGE ONLY
+// ============================================
+// 
+// ⚠️ IMPORTANT:
+// This is a FRONTEND DEMONSTRATION of the UI/UX.
+// Game passes created here are stored in browser localStorage ONLY.
+// They do NOT appear on Roblox.
+//
+// To create REAL Roblox Game Passes, you need:
+// 1. A backend server (Node.js, Python, etc.)
+// 2. Roblox OAuth credentials (from Roblox Developer Portal)
+// 3. Real Roblox API integration
+//
+// See BACKEND_SETUP.md for implementation guide
 // ============================================
 
 const CONFIG = {
+    // NOTE: These credentials are placeholders
+    // Real deployment requires a secure backend
     ROBLOX_CLIENT_ID: 'YOUR_ROBLOX_CLIENT_ID',
     ROBLOX_API_BASE: 'https://apis.roblox.com',
-    LOCAL_STORAGE_KEY: 'roblox_gamepass_maker',
-    API_TIMEOUT: 10000
+    LOCAL_STORAGE_KEY: 'roblox_gamepass_maker_demo',
+    DEMO_MODE: true
 };
-
-// ============================================
-// STATE MANAGEMENT
-// ============================================
 
 let appState = {
     isLoggedIn: false,
     userId: null,
     username: null,
-    accessToken: null,
     gamePasses: [],
     currentIcon: null
+    // NOTE: accessToken is NOT stored for security reasons
 };
 
 // ============================================
@@ -40,15 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// LOCAL STORAGE MANAGEMENT
+// LOCAL STORAGE (DEMO MODE ONLY)
 // ============================================
 
 function saveStateToStorage() {
+    // NOTE: In production, don't store auth tokens in localStorage
     const saveData = {
         isLoggedIn: appState.isLoggedIn,
         userId: appState.userId,
         username: appState.username,
-        accessToken: appState.accessToken,
         gamePasses: appState.gamePasses
     };
     localStorage.setItem(CONFIG.LOCAL_STORAGE_KEY, JSON.stringify(saveData));
@@ -57,8 +69,12 @@ function saveStateToStorage() {
 function loadStateFromStorage() {
     const stored = localStorage.getItem(CONFIG.LOCAL_STORAGE_KEY);
     if (stored) {
-        const data = JSON.parse(stored);
-        appState = { ...appState, ...data };
+        try {
+            const data = JSON.parse(stored);
+            appState = { ...appState, ...data };
+        } catch (e) {
+            console.warn('Failed to load stored state:', e);
+        }
     }
 }
 
@@ -77,26 +93,24 @@ function showAppSection() {
 }
 
 // ============================================
-// AUTHENTICATION
+// DEMO AUTHENTICATION (NOT REAL ROBLOX)
 // ============================================
 
 async function robloxLogin() {
     try {
-        showStatus('🔐 Redirecting to Roblox login...', 'loading');
+        showStatus('🔐 Demo Login (Frontend Only)', 'loading');
         
-        // Simulate Roblox OAuth flow
-        // In production, use real OAuth2 flow
+        // This is DEMO ONLY - simulates a login
+        // Real implementation would redirect to Roblox OAuth
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        
+        // Generate fake demo credentials
         const mockUserId = Math.floor(Math.random() * 999999999);
-        const mockUsername = `Player_${mockUserId}`;
-        const mockToken = btoa(`${mockUserId}:${Date.now()}`);
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const mockUsername = `DemoUser_${mockUserId}`;
         
         appState.isLoggedIn = true;
         appState.userId = mockUserId;
         appState.username = mockUsername;
-        appState.accessToken = mockToken;
         
         saveStateToStorage();
         showAppSection();
@@ -104,22 +118,21 @@ async function robloxLogin() {
         loadGamePassHistory();
         
         clearStatus();
-        showStatus('✅ Successfully logged in!', 'success');
+        showStatus('✅ Demo login successful (local storage)', 'success');
         setTimeout(() => clearStatus(), 3000);
         
     } catch (error) {
-        showStatus('❌ Login failed. Please try again.', 'error');
+        showStatus('❌ Demo login error', 'error');
         console.error('Login error:', error);
     }
 }
 
 function logout() {
-    if (confirm('Are you sure you want to logout?')) {
+    if (confirm('Clear demo data and logout?')) {
         appState = {
             isLoggedIn: false,
             userId: null,
             username: null,
-            accessToken: null,
             gamePasses: [],
             currentIcon: null
         };
@@ -129,7 +142,7 @@ function logout() {
         clearStatus();
         showLoginSection();
         
-        showStatus('👋 You have been logged out.', 'success');
+        showStatus('👋 Demo data cleared', 'success');
         setTimeout(() => clearStatus(), 2000);
     }
 }
@@ -146,7 +159,7 @@ function loadUserProfile() {
     const initials = appState.username.substring(0, 2).toUpperCase();
     userAvatar.textContent = initials;
     userName.textContent = appState.username;
-    userSubtext.textContent = `ID: ${appState.userId}`;
+    userSubtext.textContent = `Demo ID: ${appState.userId} (Local Only)`;
 }
 
 // ============================================
@@ -158,17 +171,17 @@ function validateForm() {
     const price = document.getElementById('price').value;
     
     if (!name) {
-        showStatus('❌ Game Pass name is required', 'error');
+        showStatus('❌ Name is required', 'error');
         return false;
     }
     
     if (name.length < 3) {
-        showStatus('❌ Game Pass name must be at least 3 characters', 'error');
+        showStatus('❌ Name must be at least 3 characters', 'error');
         return false;
     }
     
     if (name.length > 50) {
-        showStatus('❌ Game Pass name must not exceed 50 characters', 'error');
+        showStatus('❌ Name must not exceed 50 characters', 'error');
         return false;
     }
     
@@ -200,7 +213,7 @@ function previewIcon() {
     }
     
     if (!file.type.startsWith('image/')) {
-        showStatus('❌ Please select a valid image file', 'error');
+        showStatus('❌ Please select an image file', 'error');
         fileInput.value = '';
         return;
     }
@@ -223,7 +236,7 @@ function updateIconPreview(imageData) {
     const preview = document.getElementById('iconPreview');
     
     if (imageData) {
-        preview.innerHTML = `<img src="${imageData}" alt="Game Pass Icon">`;
+        preview.innerHTML = `<img src="${imageData}" alt="Icon">`;
         preview.classList.remove('empty');
     } else {
         preview.innerHTML = '🖼️';
@@ -233,16 +246,16 @@ function updateIconPreview(imageData) {
 
 function initializeDragDrop() {
     const fileLabel = document.getElementById('fileLabel');
+    if (!fileLabel) return;
+    
     const fileInput = document.getElementById('iconFile');
     
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        fileLabel.addEventListener(eventName, preventDefaults, false);
+        fileLabel.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
     });
-    
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
     
     ['dragenter', 'dragover'].forEach(eventName => {
         fileLabel.addEventListener(eventName, () => {
@@ -259,17 +272,15 @@ function initializeDragDrop() {
     });
     
     fileLabel.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        const files = dt.files;
+        const files = e.dataTransfer.files;
         fileInput.files = files;
-        
-        const event = new Event('change', { bubbles: true });
-        fileInput.dispatchEvent(event);
+        const changeEvent = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(changeEvent);
     });
 }
 
 // ============================================
-// GAME PASS CREATION
+// DEMO GAME PASS CREATION (LOCAL STORAGE ONLY)
 // ============================================
 
 async function createGamePass() {
@@ -284,36 +295,36 @@ async function createGamePass() {
     
     try {
         createBtn.disabled = true;
-        showStatus(`<span class="spinner"></span>Creating your game pass...`, 'loading');
+        showStatus(`<span class="spinner"></span>Saving demo entry...`, 'loading');
         
-        // Simulate API call
-        await simulateApiCall(2000);
+        // Simulate brief processing
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Generate mock game pass ID
-        const gamePassId = Math.floor(Math.random() * 999999999);
+        // Generate a local ID (NOT a real Roblox ID)
+        const localId = Math.floor(Math.random() * 999999999);
         
-        // Create game pass object
-        const gamePass = {
-            id: gamePassId,
+        // Create entry object
+        const entry = {
+            id: localId,
             name: name,
             description: desc,
             price: price,
             icon: appState.currentIcon,
             createdAt: new Date().toLocaleString(),
-            robloxUrl: `https://www.roblox.com/game-pass/${gamePassId}`
+            isDemo: true
         };
         
         // Add to history
-        appState.gamePasses.unshift(gamePass);
+        appState.gamePasses.unshift(entry);
         if (appState.gamePasses.length > 10) {
             appState.gamePasses = appState.gamePasses.slice(0, 10);
         }
         
         saveStateToStorage();
         
-        // Display success
-        showStatus('✅ Game Pass created successfully!', 'success');
-        displayResult(gamePass);
+        // Display result
+        showStatus('✅ Demo entry saved (local storage only)', 'success');
+        displayResult(entry);
         
         // Clear form
         setTimeout(() => {
@@ -322,52 +333,49 @@ async function createGamePass() {
         }, 1000);
         
     } catch (error) {
-        console.error('Creation error:', error);
-        showStatus(`❌ Failed to create game pass: ${error.message}`, 'error');
+        console.error('Error:', error);
+        showStatus(`❌ Error: ${error.message}`, 'error');
     } finally {
         createBtn.disabled = false;
     }
 }
 
-function displayResult(gamePass) {
+function displayResult(entry) {
     const resultDiv = document.getElementById('result');
     const gpId = document.getElementById('gpId');
     const gpStats = document.getElementById('gpStats');
-    const gpLink = document.getElementById('gpLink');
     
-    gpId.textContent = gamePass.id;
-    gpStats.innerHTML = `<strong>Price:</strong> ${gamePass.price} Robux<br><strong>Created:</strong> ${gamePass.createdAt}`;
-    gpLink.href = gamePass.robloxUrl;
+    gpId.textContent = `${entry.id} (Local Demo ID)`;
+    gpStats.innerHTML = `<strong>Price:</strong> ${entry.price} Robux<br><strong>Saved:</strong> ${entry.createdAt}<br><strong>Status:</strong> Local Storage Only`;
     
     resultDiv.classList.remove('hidden');
     resultDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ============================================
-// GAME PASS HISTORY
+// HISTORY DISPLAY
 // ============================================
 
 function loadGamePassHistory() {
     const historyList = document.getElementById('historyList');
     
     if (appState.gamePasses.length === 0) {
-        historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No game passes created yet. Create your first one!</p>';
+        historyList.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No entries yet. Create one to test!</p>';
         return;
     }
     
-    historyList.innerHTML = appState.gamePasses.map((gp, index) => `
+    historyList.innerHTML = appState.gamePasses.map((gp) => `
         <div class="history-item">
             <div class="history-item-info">
                 <h4>${gp.name}</h4>
                 <p>💰 ${gp.price} Robux • ${gp.createdAt}</p>
             </div>
-            <a href="${gp.robloxUrl}" target="_blank" class="history-item-link">View Pass →</a>
         </div>
     `).join('');
 }
 
 // ============================================
-// STATUS & MESSAGES
+// STATUS MESSAGES
 // ============================================
 
 function showStatus(message, type) {
@@ -401,10 +409,6 @@ function clearForm() {
 // UTILITIES
 // ============================================
 
-function simulateApiCall(delay) {
-    return new Promise(resolve => setTimeout(resolve, delay));
-}
-
 function formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -423,7 +427,7 @@ document.addEventListener('keydown', (e) => {
     // Ctrl/Cmd + Enter to submit
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && appState.isLoggedIn) {
         const nameField = document.getElementById('name');
-        if (nameField.value.trim()) {
+        if (nameField && nameField.value.trim()) {
             createGamePass();
         }
     }
@@ -435,13 +439,21 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============================================
-// ERROR HANDLING & LOGGING
+// ERROR HANDLING
 // ============================================
 
 window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
+    console.error('Error:', event.error);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
     console.error('Unhandled rejection:', event.reason);
 });
+
+// ============================================
+// STARTUP MESSAGE
+// ============================================
+
+console.log('%c🎮 Roblox Game Pass Maker - DEMO MODE', 'color: #00b06f; font-size: 16px; font-weight: bold;');
+console.log('%cℹ️ This is a FRONTEND-ONLY DEMO\nGame passes are stored in localStorage ONLY\nThey do NOT appear on Roblox', 'color: #ffb74d; font-size: 12px;');
+console.log('📖 See GitHub README for backend setup instructions');
