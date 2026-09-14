@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Game Pass Maker - Pro Edition</title>
-    <link rel="manifest" href="/manifest.json">
+    <title>Roblox Game Pass Maker - Demo Edition</title>
+    <link rel="manifest" href="./manifest.json">
     <style>
         * {
             margin: 0;
@@ -42,6 +42,18 @@
         header p {
             color: #888;
             font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 10px;
+            font-weight: 600;
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.5);
         }
 
         .card {
@@ -111,12 +123,12 @@
             box-shadow: 0 4px 15px rgba(0, 176, 111, 0.3);
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 176, 111, 0.5);
         }
 
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
         }
 
@@ -156,6 +168,12 @@
             border-left: 4px solid #ff3b30;
         }
 
+        .status.warning {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ffb74d;
+            border-left: 4px solid #ff9800;
+        }
+
         .result-box {
             margin-top: 20px;
             padding: 20px;
@@ -172,23 +190,6 @@
 
         .result-box strong {
             color: #00ff9f;
-        }
-
-        .result-box a {
-            display: inline-block;
-            margin-top: 10px;
-            color: #00d4ff;
-            text-decoration: none;
-            padding: 10px 20px;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .result-box a:hover {
-            background: rgba(0, 212, 255, 0.2);
-            border-color: rgba(0, 212, 255, 0.5);
         }
 
         .profile-section {
@@ -238,9 +239,6 @@
             border-radius: 8px;
             margin-bottom: 10px;
             border-left: 4px solid #00b06f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .history-item-info h4 {
@@ -251,19 +249,6 @@
         .history-item-info p {
             color: #888;
             font-size: 0.9em;
-        }
-
-        .history-item-link {
-            color: #00ff9f;
-            text-decoration: none;
-            padding: 8px 15px;
-            background: rgba(0, 176, 111, 0.2);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .history-item-link:hover {
-            background: rgba(0, 176, 111, 0.3);
         }
 
         .icon-preview {
@@ -295,6 +280,26 @@
         .icon-preview.empty {
             color: #888;
             font-size: 2em;
+        }
+
+        .info-box {
+            background: rgba(100, 150, 200, 0.1);
+            border-left: 4px solid #64b3d5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #b3d9ff;
+            font-size: 0.9em;
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.1);
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #ffb74d;
+            font-size: 0.9em;
         }
 
         @keyframes slideDown {
@@ -389,12 +394,6 @@
             .logout-btn {
                 width: 100%;
             }
-
-            .history-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
         }
     </style>
 </head>
@@ -403,14 +402,20 @@
         <!-- Header -->
         <header>
             <h1>🎮 Roblox Game Pass Maker</h1>
-            <p>Create and manage your game passes effortlessly</p>
+            <p>Create and manage game passes</p>
+            <div class="status-badge">📋 DEMO MODE</div>
         </header>
 
         <!-- 1. Login Section -->
         <div class="card" id="login-section">
             <h2>Welcome</h2>
-            <p style="margin-bottom: 20px; color: #aaa;">Sign in with your Roblox account to get started</p>
-            <button onclick="robloxLogin()">🔐 Log in with Roblox</button>
+            <div class="info-box">
+                <strong>ℹ️ DEMO VERSION:</strong> This is a demonstration interface only. 
+                Game passes created here are stored locally in your browser and do NOT appear on Roblox. 
+                Real Roblox integration requires a backend server with OAuth credentials.
+            </div>
+            <p style="margin-bottom: 20px; color: #aaa;">Sign in to explore the interface</p>
+            <button onclick="robloxLogin()">🔐 Demo Login</button>
         </div>
 
         <!-- 2. Main App Section (Hidden until logged in) -->
@@ -421,65 +426,84 @@
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">R</div>
                         <div>
-                            <h3 id="userName" style="color: #00d4ff;">Loading...</h3>
-                            <p id="userSubtext" style="color: #888; font-size: 0.9em;">Ready to create</p>
+                            <h3 id="userName" style="color: #00d4ff;">Demo User</h3>
+                            <p id="userSubtext" style="color: #888; font-size: 0.9em;">Local storage only</p>
                         </div>
                     </div>
                     <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 </div>
             </div>
 
+            <!-- Demo Warning -->
+            <div class="card warning-box">
+                <strong>⚠️ DEMO MODE:</strong> This frontend demonstrates the UI/UX only.
+                Entries are saved to your browser's local storage. 
+                To create <strong>real</strong> Roblox Game Passes, deploy a backend server that handles Roblox OAuth + API.
+            </div>
+
             <!-- Creation Form -->
             <div class="card">
-                <h2>✨ Create New Game Pass</h2>
+                <h2>✨ Create Demo Entry</h2>
                 
                 <div class="form-group">
                     <label for="name">Game Pass Name *</label>
-                    <input type="text" id="name" placeholder="e.g., VIP Pass, Double XP, Premium Access" required>
+                    <input type="text" id="name" placeholder="e.g., VIP Pass" required>
                 </div>
 
                 <div class="form-group">
                     <label for="desc">Description</label>
-                    <textarea id="desc" placeholder="Describe what this game pass offers to your players..."></textarea>
+                    <textarea id="desc" placeholder="What does this offer?"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="price">Price (Robux) *</label>
-                    <input type="number" id="price" placeholder="e.g., 99, 199, 499" min="5" step="1" required>
+                    <input type="number" id="price" placeholder="99" min="5" step="1" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Game Pass Icon (PNG, JPG, up to 5MB)</label>
+                    <label>Icon (PNG/JPG, up to 5MB)</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="iconFile" accept="image/png,image/jpeg,image/jpg" onchange="previewIcon()">
-                        <label for="iconFile" class="file-input-label" id="fileLabel">
+                        <label for="iconFile" class="file-input-label">
                             📤 Click to upload or drag & drop
                         </label>
                     </div>
                     <div class="icon-preview empty" id="iconPreview">🖼️</div>
                 </div>
 
-                <button onclick="createGamePass()" id="createBtn">🚀 Create Game Pass</button>
+                <button onclick="createGamePass()" id="createBtn">📝 Save Demo Entry</button>
                 <div id="status"></div>
 
                 <div id="result" class="hidden">
                     <div class="result-box">
-                        <p><strong>✅ Success!</strong></p>
-                        <p><strong>Game Pass ID:</strong> <span id="gpId"></span></p>
+                        <p><strong>✅ Entry Saved</strong></p>
+                        <p style="color: #ffb74d;">ℹ️ Local storage only, not on Roblox</p>
+                        <p><strong>Local ID:</strong> <span id="gpId"></span></p>
                         <p id="gpStats"></p>
-                        <a id="gpLink" href="#" target="_blank">👉 View in Roblox Store</a>
                     </div>
                 </div>
             </div>
 
             <!-- History Section -->
             <div class="card history-section">
-                <h2>📋 Recent Game Passes</h2>
+                <h2>📋 Demo Entries</h2>
+                <p style="color: #888; font-size: 0.9em; margin-bottom: 15px;">Stored in browser only. Refresh page to test persistence.</p>
                 <div id="historyList"></div>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="./app.js"></script>
+    
+    <!-- Service Worker Registration for offline/PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('✅ Service Worker registered'))
+                    .catch(err => console.warn('⚠️ Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
